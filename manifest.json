@@ -1,0 +1,15 @@
+{
+  "name": "Precificação SILK",
+  "short_name": "SilkCalc",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f4f7",
+  "theme_color": "#183f5d",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3014/3014235.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

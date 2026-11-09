@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precificação SILK Screen</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#183f5d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Precificação SILK">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Precifica%C3%A7%C3%A3o%20SILK%22%2C%22short_name%22%3A%22SilkCalc%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f4f7%22%2C%22theme_color%22%3A%22%23183f5d%22%7D">
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#183f5d',
+              dark: '#102d44',
+              light: '#245f85',
+              accent: '#0284c7'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+      }
+      .no-print { display: none !important; }
+      .print-shadow-none {
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb !important;
+      }
+    }
+
+    input[type="checkbox"] { accent-color: #183f5d; }
+  </style>
+</head>
+<body class="bg-[#f1f4f7] text-slate-800 font-sans antialiased min-h-screen pb-12">
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+    <span id="toast-message" class="text-sm font-medium">Operação realizada!</span>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 pt-6 md:pt-10">
+    
+    <!-- Header Principal -->
+    <header class="bg-brand text-white p-6 md:p-8 rounded-2xl shadow-lg mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+        <i data-lucide="printer" class="w-64 h-64"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-3 mb-1">
+          <div class="p-2 bg-brand-light/40 rounded-lg">
+            <i data-lucide="layers" class="w-6 h-6 text-sky-300"></i>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight">PRECIFICAÇÃO SILK</h1>
+        </div>
+        <p class="text-slate-300 text-sm md:text-base pl-11">Calculadora de Saída & Orçamentos de Camisetas</p>
+      </div>
+      
+      <div class="no-print flex items-center gap-2 flex-wrap">
+        <button id="btn-install" onclick="instalarPWA()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Instalar App
+        </button>
+        <button onclick="resetarFormulario()" title="Limpar Campos" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition backdrop-blur-sm">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Limpar
+        </button>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 gap-6">
+
+      <!-- MODO CONSTRUTOR: TABELA EDITÁVEL COMPLETA DE PREÇOS DE SAÍDA E TELAS -->
+      <section class="bg-white rounded-2xl shadow-sm border border-brand-light/30 no-print overflow-hidden">
+        <div class="p-4 md:p-5 bg-gradient-to-r from-slate-50 to-blue-50/50 flex justify-between items-center cursor-pointer select-none" onclick="toggleConfig()">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-brand/10 text-brand rounded-lg">
+              <i data-lucide="wrench" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-brand">🛠️ Modo Construtor (Valores de Saída & Telas)</h2>
+              <p class="text-xs text-slate-500">Ajuste os valores de venda padrão para cada tamanho (A5 até A0)</p>
+            </div>
+          </div>
+          <span id="configToggleIcon" class="text-xs font-bold px-3 py-1 bg-white border border-slate-200 rounded-lg text-brand flex items-center gap-1">
+            <span>Expandir</span>
+            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </span>
+        </div>
+
+        <div id="configBody" class="hidden p-5 border-t border-slate-100 bg-white">
+          <p class="text-xs text-slate-600 mb-3">
+            Defina os valores de saída finais de impressão (1ª Cor e Cor Adicional) e gravação das Telas (Base e Adicional). Todas as alterações ficam salvas no aparelho.
+          </p>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left text-slate-700 border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-800 uppercase font-semibold">
+                  <th class="p-2 border">Tam</th>
+                  <th class="p-2 border text-center">Clara (1ª Cor)</th>
+                  <th class="p-2 border text-center">Escura (1ª Cor)</th>
+                  <th class="p-2 border text-center">Clara (Cor Extra)</th>
+                  <th class="p-2 border text-center">Escura (Cor Extra)</th>
+                  <th class="p-2 border text-center bg-amber-50 text-amber-900">Tela Base (R$)</th>
+                  <th class="p-2 border text-center bg-amber-50 text-amber-900">Tela Extra (R$)</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaConfigBody"></tbody>
+            </table>
+          </div>
+          
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button onclick="salvarConfig()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Salvar Novos Valores
+            </button>
+            <button onclick="resetarConfig()" class="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              Restaurar Padrão
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD 1: DADOS DO PEDIDO -->
+      <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200/80 print-shadow-none">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm">1</div>
+          <h2 class="text-lg font-bold text-brand">Dados do Pedido</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Quantidade -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2" for="quantidade">
+              Quantidade de Camisas
+            </label>
+            <div class="relative">
+              <input type="number" id="quantidade" min="1" value="50" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand focus:border-brand outline-none transition font-medium text-slate-800">
+              <i data-lucide="shirt" class="w-5 h-5 text-slate-400 absolute left-3 top-3"></i>
+            </div>
+          </div>
+
+          <!-- Cor do Tecido -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2" for="tecido">
+              Cor do Tecido
+            </label>
+            <div class="relative">
+              <select id="tecido" class="w-full pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand focus:border-brand outline-none transition font-medium text-slate-800 appearance-none cursor-pointer">
+                <option value="0">Clara</option>
+                <option value="1">Escura</option>
+              </select>
+              <i data-lucide="palette" class="w-5 h-5 text-slate-400 absolute left-3 top-3"></i>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3.5 pointer-events-none"></i>
+            </div>
+          </div>
+
+          <!-- Fotolito -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2" for="fotolito">
+              Área Total de Fotolito (m²)
+            </label>
+            <div class="relative">
+              <input type="number" id="fotolito" min="0" step="0.01" value="0" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand focus:border-brand outline-none transition font-medium text-slate-800">
+              <i data-lucide="file-text" class="w-5 h-5 text-slate-400 absolute left-3 top-3"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD 2: COMPOSIÇÃO DA CAMISA -->
+      <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200/80 print-shadow-none">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm">2</div>
+            <div>
+              <h2 class="text-lg font-bold text-brand">Composição da Camisa</h2>
+              <p class="text-xs text-slate-500">Acompanhe os valores de saída e ajuste os nomes das estampas.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="posicoes" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-3">
+          <input type="checkbox" id="mesmaArte" class="mt-1 w-4 h-4 rounded text-brand focus:ring-brand cursor-pointer">
+          <label for="mesmaArte" class="cursor-pointer select-none">
+            <span class="text-sm font-bold text-slate-800 block">Mesma arte nas duas mangas</span>
+            <span class="text-xs text-slate-500 block leading-relaxed mt-0.5">
+              A impressão será cobrada nas duas mangas, mas a gravação de tela será cobrada 1 vez.
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- CARD 3: RESULTADO DO ORÇAMENTO -->
+      <section class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200/80 print-shadow-none">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-sm">3</div>
+            <h2 class="text-lg font-bold text-brand">Resultado do Orçamento</h2>
+          </div>
+        </div>
+
+        <div id="detalhamento" class="space-y-2 text-sm text-slate-600 mb-6"></div>
+
+        <div class="bg-gradient-to-br from-slate-900 via-brand to-brand-dark text-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="text-center sm:text-left">
+            <span class="text-xs uppercase tracking-wider text-slate-300 font-semibold">Total do Pedido</span>
+            <div id="total" class="text-3xl md:text-4xl font-extrabold tracking-tight text-white mt-0.5">R$ 0,00</div>
+          </div>
+          <div class="h-10 w-px bg-white/20 hidden sm:block"></div>
+          <div class="text-center sm:text-right border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0 w-full sm:w-auto">
+            <span class="text-xs uppercase tracking-wider text-slate-300 font-semibold">Preço por Camisa</span>
+            <div id="unitario" class="text-xl md:text-2xl font-bold text-sky-300 mt-0.5">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div id="avisos" class="mt-4 space-y-2"></div>
+
+        <div class="mt-6 flex flex-col sm:flex-row gap-3 no-print">
+          <button onclick="copiarOrcamento()" class="flex-1 py-
